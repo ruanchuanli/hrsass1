@@ -1,90 +1,56 @@
-import { login, logout, getInfo } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
-import { resetRouter } from '@/router'
 
-const getDefaultState = () => {
-  return {
-    token: getToken(),
-    name: '',
-    avatar: ''
-  }
+// 导入操作在本地的token的方法
+import { getToken, setToken, removeToken, setTimeStamp } from '@/utils/auth'
+// 导入登录接口的api
+import { login, getUserinfo, getUserDetailinfo } from '@/api/user'
+const state = {
+  token: getToken(),
+  userInfo: {} // 不写为null，防止null.xxx报错
 }
-
-const state = getDefaultState()
-
 const mutations = {
-  RESET_STATE: (state) => {
-    Object.assign(state, getDefaultState())
-  },
-  SET_TOKEN: (state, token) => {
+  // 设置token值
+  setToken(state, token) {
     state.token = token
+    // 将token值存到本地中
+    setToken(token)
   },
-  SET_NAME: (state, name) => {
-    state.name = name
+  removeToken(state) {
+    // 将token设置为空空
+    state.token = null
+    // 同时也将本地中的token清除
+    removeToken()
   },
-  SET_AVATAR: (state, avatar) => {
-    state.avatar = avatar
+
+  // 设置用户信息
+  setUserinfo(state, payload) {
+    state.userInfo = payload
+  },
+  removeUserinfo(state) {
+    state.userInfo = {}
   }
 }
-
+// 请求数据的方法写在actions中
 const actions = {
-  // user login
-  login({ commit }, userInfo) {
-    const { username, password } = userInfo
-    return new Promise((resolve, reject) => {
-      login({ username: username.trim(), password: password }).then(response => {
-        const { data } = response
-        commit('SET_TOKEN', data.token)
-        setToken(data.token)
-        resolve()
-      }).catch(error => {
-        reject(error)
-      })
-    })
+  // 登录
+  async login(context, datas) {
+    // axiso响应拦截器已经处理了返回的数据，直接使用
+    const result = await login(datas)
+    console.log(result, 111)
+    context.commit('setToken', result)
+    // 登录的时候设置时间戳,在axios请求拦截器中获取
+    setTimeStamp()
   },
-
-  // get user info
-  getInfo({ commit, state }) {
-    return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
-        const { data } = response
-
-        if (!data) {
-          return reject('Verification failed, please Login again.')
-        }
-
-        const { name, avatar } = data
-
-        commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
-        resolve(data)
-      }).catch(error => {
-        reject(error)
-      })
-    })
+  // 获取用户信息
+  async getUserinfos(context) {
+    const result = await getUserinfo()
+    const detailinfo = await getUserDetailinfo(result.userId)
+    context.commit('setUserinfo', { ...result, ...detailinfo })
+    return result // 用于下次权限操作
   },
-
-  // user logout
-  logout({ commit, state }) {
-    return new Promise((resolve, reject) => {
-      logout(state.token).then(() => {
-        removeToken() // must remove  token  first
-        resetRouter()
-        commit('RESET_STATE')
-        resolve()
-      }).catch(error => {
-        reject(error)
-      })
-    })
-  },
-
-  // remove token
-  resetToken({ commit }) {
-    return new Promise(resolve => {
-      removeToken() // must remove  token  first
-      commit('RESET_STATE')
-      resolve()
-    })
+  // 退出
+  async logout(context) {
+    context.commit('removeToken') // 删除vuex中的token和本地存储的token
+    context.commit('removeUserinfo')
   }
 }
 
