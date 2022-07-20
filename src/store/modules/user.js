@@ -3,6 +3,8 @@
 import { getToken, setToken, removeToken, setTimeStamp } from '@/utils/auth'
 // 导入登录接口的api
 import { login, getUserinfo, getUserDetailinfo } from '@/api/user'
+import { resetRouter } from '@/router'
+import store from '@/store'
 const state = {
   token: getToken(),
   userInfo: {} // 不写为null，防止null.xxx报错
@@ -51,6 +53,10 @@ const actions = {
   async logout(context) {
     context.commit('removeToken') // 删除vuex中的token和本地存储的token
     context.commit('removeUserinfo')
+    // 重置路由
+    resetRouter()
+    // 调用父级下permission中的设置路由方法
+    context.commit('permission/setRoutes', [], { root: true })
   }
 }
 

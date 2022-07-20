@@ -5,11 +5,11 @@
       class="hamburger-container"
       @toggleClick="toggleSideBar"
     />
-    <div class="app-breadcrumb">
+    <!-- <div class="app-breadcrumb">
       江苏传智播客教育科技股份有限公司
       <span class="breadBtn">体验版</span>
-    </div>
-    <!-- <breadcrumb class="breadcrumb-container" /> -->
+    </div> -->
+    <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click">
@@ -36,12 +36,12 @@
 
 <script>
 import { mapGetters } from 'vuex'
-// import Breadcrumb from '@/components/Breadcrumb'
+import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
 
 export default {
   components: {
-    // Breadcrumb,
+    Breadcrumb,
     Hamburger
   },
   data() {

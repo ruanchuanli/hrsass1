@@ -17,9 +17,14 @@ router.beforeEach(async(to, from, next) => {
       // 如果没有用户信息就去获取
       if (!store.getters.userId) {
         // 得加await，不然可能会在还没获取到用户信息时，已经执行next
-        await store.dispatch('user/getUserinfos')
+        const { roles: { menus }} = await store.dispatch('user/getUserinfos')
+        // 得到用户拥有哪些权限路由
+        const routes = await store.dispatch('permission/filterRoutes', menus)
+        router.addRoutes([...routes, { path: '*', redirect: '/404', hidden: true }])
+        next(to.path)
+      } else {
+        next()
       }
-      next()
     }
   } else {
     // 如果没有token，并且要去的页面不在白名单中，就去登录，否则放行

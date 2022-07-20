@@ -40,13 +40,21 @@ export const constantRoutes = [
       meta: { title: '首页', icon: 'dashboard' }
     }]
   },
+  {
+    path: '/import',
+    component: Layout,
+    children: [{
+      path: '',
+      component: () => import('@/views/import')
+    }]
+  }
 
   // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true }
+  // { path: '*', redirect: '/404', hidden: true }
 ]
 
 // 动态路由
-const asyncRoutes = [
+export const asyncRoutes = [
   approvalsRouter,
   departmentsRouter,
   employeesRouter,
@@ -61,7 +69,7 @@ const createRouter = () => new Router({
   // mode: 'history', // require service support
   scrollBehavior: () => ({ y: 0 }),
   // 将静态路由与动态路由
-  routes: [...constantRoutes, ...asyncRoutes]
+  routes: [...constantRoutes]
 })
 
 const router = createRouter()
